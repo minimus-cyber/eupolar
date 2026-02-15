@@ -1,0 +1,47 @@
+<%- include('../partials/header') %>
+
+<h2>Benvenuto, <%= user.name %>!</h2>
+
+<div class="grid">
+  <div class="card">
+    <h3>📊 Lifechart</h3>
+    <p>Traccia l'andamento del tuo umore nel tempo. Visualizza i pattern e identifica i fattori scatenanti.</p>
+    <a href="/user/lifechart" class="btn">Accedi al Lifechart</a>
+  </div>
+
+  <div class="card">
+    <h3>📝 Diario dell'Umore</h3>
+    <p>Registra quotidianamente il tuo umore, energia e altri parametri attraverso domande guidate.</p>
+    <a href="/user/mood-diary" class="btn">Apri Diario</a>
+  </div>
+
+  <div class="card">
+    <h3>📋 Questionari</h3>
+    <p>Compila questionari di autovalutazione per monitorare i tuoi progressi.</p>
+    <a href="/user/questionnaires" class="btn">Vedi Questionari</a>
+  </div>
+</div>
+
+<div class="card">
+  <h3>📚 Risorse Aggiuntive</h3>
+  <p>Non dimenticare di consultare anche le sezioni pubbliche del portale:</p>
+  <ul style="margin-left: 2rem; margin-top: 1rem;">
+    <li><a href="/psychoeducation">Psicoeducazione</a> - Materiali educativi sul disturbo bipolare</li>
+    <li><a href="/family">Familiari e Amici</a> - Risorse per i tuoi cari</li>
+    <li><a href="/about">Info Disturbo Bipolare</a> - Informazioni generali</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>⚠️ Importante</h3>
+  <p>
+    Questi strumenti sono complementari, non sostitutivi, della cura professionale. 
+    Continua a seguire le indicazioni del tuo medico e non modificare la terapia senza consultarlo.
+  </p>
+  <p style="margin-top: 1rem;">
+    <strong>In caso di emergenza o pensieri di autolesionismo, contatta immediatamente i servizi di emergenza (112) 
+    o recati al pronto soccorso più vicino.</strong>
+  </p>
+</div>
+
+<%- include('../partials/footer') %>

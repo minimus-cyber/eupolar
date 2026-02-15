@@ -1,0 +1,136 @@
+<%- include('../partials/header') %>
+
+<h2>Diario dell'Umore</h2>
+
+<div class="card">
+  <h3>Nuova Registrazione Diario</h3>
+  <form method="POST" action="/user/mood-diary">
+    <div class="form-group">
+      <label for="date">Data:</label>
+      <input type="date" id="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>">
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Come ti sei sentito oggi?</h4>
+    
+    <div class="form-group">
+      <label for="mood_morning">Umore al Mattino (1-10):</label>
+      <input type="range" id="mood_morning" name="mood_morning" min="1" max="10" value="5" oninput="document.getElementById('morning_value').textContent = this.value">
+      <div class="range-value">
+        <span id="morning_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto basso | 10 = Molto alto</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mood_afternoon">Umore al Pomeriggio (1-10):</label>
+      <input type="range" id="mood_afternoon" name="mood_afternoon" min="1" max="10" value="5" oninput="document.getElementById('afternoon_value').textContent = this.value">
+      <div class="range-value">
+        <span id="afternoon_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto basso | 10 = Molto alto</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mood_evening">Umore alla Sera (1-10):</label>
+      <input type="range" id="mood_evening" name="mood_evening" min="1" max="10" value="5" oninput="document.getElementById('evening_value').textContent = this.value">
+      <div class="range-value">
+        <span id="evening_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto basso | 10 = Molto alto</div>
+      </div>
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Altri parametri:</h4>
+
+    <div class="form-group">
+      <label for="energy_level">Livello di Energia (1-10):</label>
+      <input type="range" id="energy_level" name="energy_level" min="1" max="10" value="5" oninput="document.getElementById('energy_value').textContent = this.value">
+      <div class="range-value">
+        <span id="energy_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Esausto | 10 = Pieno di energia</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="anxiety_level">Livello di Ansia (1-10):</label>
+      <input type="range" id="anxiety_level" name="anxiety_level" min="1" max="10" value="5" oninput="document.getElementById('anxiety_value').textContent = this.value">
+      <div class="range-value">
+        <span id="anxiety_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto calmo | 10 = Molto ansioso</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="irritability_level">Livello di Irritabilità (1-10):</label>
+      <input type="range" id="irritability_level" name="irritability_level" min="1" max="10" value="5" oninput="document.getElementById('irritability_value').textContent = this.value">
+      <div class="range-value">
+        <span id="irritability_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto calmo | 10 = Molto irritabile</div>
+      </div>
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Descrizioni:</h4>
+
+    <div class="form-group">
+      <label for="activities">Attività della giornata:</label>
+      <textarea id="activities" name="activities" placeholder="Cosa hai fatto oggi? (lavoro, hobby, esercizio, socializzazione...)"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="thoughts">Pensieri predominanti:</label>
+      <textarea id="thoughts" name="thoughts" placeholder="Quali pensieri hanno caratterizzato la tua giornata?"></textarea>
+    </div>
+
+    <button type="submit" class="btn">Salva nel Diario</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Registrazioni Recenti (Ultime 30)</h3>
+  
+  <% if (entries && entries.length > 0) { %>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Umore Mattino</th>
+            <th>Umore Pomeriggio</th>
+            <th>Umore Sera</th>
+            <th>Energia</th>
+            <th>Ansia</th>
+            <th>Irritabilità</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% entries.forEach(entry => { %>
+            <tr>
+              <td><%= entry.date %></td>
+              <td><%= entry.mood_morning || '-' %>/10</td>
+              <td><%= entry.mood_afternoon || '-' %>/10</td>
+              <td><%= entry.mood_evening || '-' %>/10</td>
+              <td><%= entry.energy_level || '-' %>/10</td>
+              <td><%= entry.anxiety_level || '-' %>/10</td>
+              <td><%= entry.irritability_level || '-' %>/10</td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p>Nessuna registrazione ancora. Inizia a tenere il tuo diario!</p>
+  <% } %>
+</div>
+
+<div class="card">
+  <h3>💡 Suggerimenti per il Diario</h3>
+  <ul style="margin-left: 2rem;">
+    <li>Compila il diario ogni sera prima di andare a letto</li>
+    <li>Sii specifico nelle descrizioni di attività e pensieri</li>
+    <li>Non giudicarti - registra semplicemente come ti senti</li>
+    <li>Cerca pattern che si ripetono nel tempo</li>
+    <li>Usa queste informazioni per discutere con il tuo terapeuta</li>
+    <li>Nota come diversi fattori (sonno, attività, eventi) influenzano il tuo umore</li>
+  </ul>
+</div>
+
+<%- include('../partials/footer') %>

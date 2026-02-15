@@ -1,0 +1,85 @@
+<%- include('../partials/header') %>
+
+<h2>Questionari di Autoaiuto</h2>
+
+<div class="card">
+  <h3>Questionari Disponibili</h3>
+  <p>Completa questi questionari per monitorare il tuo benessere e progressi nel tempo.</p>
+  
+  <div class="grid">
+    <div class="card" style="background-color: #f8f9fa;">
+      <h4>📋 Valutazione dell'Umore</h4>
+      <p>Un breve questionario per valutare il tuo stato d'umore attuale.</p>
+      <a href="/user/questionnaires/mood-assessment" class="btn btn-secondary">Compila</a>
+    </div>
+
+    <div class="card" style="background-color: #f8f9fa;">
+      <h4>💊 Aderenza alla Terapia</h4>
+      <p>Valuta quanto stai seguendo il piano terapeutico.</p>
+      <a href="/user/questionnaires/medication-adherence" class="btn btn-secondary">Compila</a>
+    </div>
+
+    <div class="card" style="background-color: #f8f9fa;">
+      <h4>😴 Qualità del Sonno</h4>
+      <p>Monitora i tuoi pattern di sonno e riposo.</p>
+      <a href="/user/questionnaires/sleep-quality" class="btn btn-secondary">Compila</a>
+    </div>
+
+    <div class="card" style="background-color: #f8f9fa;">
+      <h4>🎯 Benessere Generale</h4>
+      <p>Una valutazione olistica del tuo benessere.</p>
+      <a href="/user/questionnaires/general-wellbeing" class="btn btn-secondary">Compila</a>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Storico Questionari Completati</h3>
+  
+  <% if (responses && responses.length > 0) { %>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Tipo Questionario</th>
+            <th>Punteggio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% responses.forEach(response => { %>
+            <tr>
+              <td><%= new Date(response.completed_at).toLocaleDateString('it-IT') %></td>
+              <td>
+                <% 
+                  let typeName = response.questionnaire_type;
+                  if (typeName === 'mood-assessment') typeName = 'Valutazione dell\'Umore';
+                  else if (typeName === 'medication-adherence') typeName = 'Aderenza alla Terapia';
+                  else if (typeName === 'sleep-quality') typeName = 'Qualità del Sonno';
+                  else if (typeName === 'general-wellbeing') typeName = 'Benessere Generale';
+                %>
+                <%= typeName %>
+              </td>
+              <td><%= response.score %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p>Non hai ancora completato questionari. Inizia selezionando uno dei questionari sopra!</p>
+  <% } %>
+</div>
+
+<div class="card">
+  <h3>💡 Note Importanti</h3>
+  <ul style="margin-left: 2rem;">
+    <li>I questionari sono strumenti di autovalutazione e non sostituiscono la valutazione clinica</li>
+    <li>Rispondi onestamente per ottenere risultati utili</li>
+    <li>Completa i questionari regolarmente per monitorare i cambiamenti nel tempo</li>
+    <li>Condividi i risultati con il tuo medico o terapeuta</li>
+    <li>Se noti un peggioramento significativo, contatta il tuo professionista sanitario</li>
+  </ul>
+</div>
+
+<%- include('../partials/footer') %>

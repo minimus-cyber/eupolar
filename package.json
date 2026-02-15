@@ -1,0 +1,30 @@
+{
+  "name": "eupolar",
+  "version": "1.0.0",
+  "description": "portale di psicoeducazione basato sul metodo di Colom e Vieta",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minimus-cyber/eupolar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/minimus-cyber/eupolar/issues"
+  },
+  "homepage": "https://github.com/minimus-cyber/eupolar#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "sqlite3": "^5.1.7"
+  }
+}
