@@ -22,8 +22,10 @@
   "homepage": "https://github.com/minimus-cyber/eupolar#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "csurf": "^1.11.0",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "express-session": "^1.19.0",
     "sqlite3": "^5.1.7"
   }

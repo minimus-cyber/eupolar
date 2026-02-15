@@ -85,8 +85,17 @@ Il sistema utilizza SQLite con le seguenti tabelle:
 
 - Password criptate con bcrypt
 - Sessioni sicure con express-session
+- Rate limiting per prevenire abusi
 - Validazione input lato server
 - Protezione delle route autenticate
+- Cookie HttpOnly per prevenire XSS
+
+**Note per la Produzione:**
+- Configurare HTTPS e impostare `NODE_ENV=production`
+- Cambiare `SESSION_SECRET` con una chiave segreta sicura
+- Implementare backup regolari del database
+- Considerare l'uso di un database più robusto (PostgreSQL, MySQL)
+- Aggiungere protezione CSRF per i form se necessario
 
 ## Note Importanti
 

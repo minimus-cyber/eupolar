@@ -1,10 +1,27 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Troppi tentativi da questo IP, riprova più tardi.'
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // Limit auth attempts
+  message: 'Troppi tentativi di accesso, riprova più tardi.'
+});
+
+app.use('/auth', authLimiter);
+app.use(limiter);
 
 // View engine setup
 app.set('view engine', 'ejs');
@@ -21,7 +38,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: false, // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
