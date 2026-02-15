@@ -1,0 +1,77 @@
+<%- include('../partials/header') %>
+
+<% 
+  let title = type;
+  let questions = [];
+  
+  if (type === 'mood-assessment') {
+    title = 'Valutazione dell\'Umore';
+    questions = [
+      { id: 'q1', text: 'Come descriveresti il tuo umore negli ultimi giorni?', type: 'range', min: 1, max: 10, label: '1=Molto depresso, 10=Molto euforico' },
+      { id: 'q2', text: 'Quanto bene stai dormendo?', type: 'range', min: 1, max: 10, label: '1=Molto male, 10=Molto bene' },
+      { id: 'q3', text: 'Come valuti il tuo livello di energia?', type: 'range', min: 1, max: 10, label: '1=Molto basso, 10=Molto alto' },
+      { id: 'q4', text: 'Hai avuto pensieri negativi ricorrenti?', type: 'range', min: 1, max: 10, label: '1=Mai, 10=Sempre' },
+      { id: 'q5', text: 'Come valuti la tua capacità di concentrazione?', type: 'range', min: 1, max: 10, label: '1=Molto scarsa, 10=Ottima' }
+    ];
+  } else if (type === 'medication-adherence') {
+    title = 'Aderenza alla Terapia';
+    questions = [
+      { id: 'q1', text: 'Quanto spesso prendi i farmaci come prescritto?', type: 'range', min: 1, max: 10, label: '1=Mai, 10=Sempre' },
+      { id: 'q2', text: 'Ti dimentichi mai di prendere i farmaci?', type: 'range', min: 1, max: 10, label: '1=Sempre, 10=Mai' },
+      { id: 'q3', text: 'Quanto sei soddisfatto della tua terapia farmacologica?', type: 'range', min: 1, max: 10, label: '1=Per niente, 10=Molto' },
+      { id: 'q4', text: 'Hai effetti collaterali che ti disturbano?', type: 'range', min: 1, max: 10, label: '1=Nessuno, 10=Molti e gravi' },
+      { id: 'q5', text: 'Quanto è facile seguire il tuo schema terapeutico?', type: 'range', min: 1, max: 10, label: '1=Molto difficile, 10=Molto facile' }
+    ];
+  } else if (type === 'sleep-quality') {
+    title = 'Qualità del Sonno';
+    questions = [
+      { id: 'q1', text: 'Quante ore dormi in media per notte?', type: 'range', min: 0, max: 12, label: 'ore' },
+      { id: 'q2', text: 'Quanto ti senti riposato al risveglio?', type: 'range', min: 1, max: 10, label: '1=Per niente, 10=Molto' },
+      { id: 'q3', text: 'Quanto tempo impieghi ad addormentarti?', type: 'range', min: 1, max: 10, label: '1=Subito, 10=Molto tempo' },
+      { id: 'q4', text: 'Quanto spesso ti svegli durante la notte?', type: 'range', min: 1, max: 10, label: '1=Mai, 10=Molto spesso' },
+      { id: 'q5', text: 'Come valuti la qualità complessiva del tuo sonno?', type: 'range', min: 1, max: 10, label: '1=Pessima, 10=Ottima' }
+    ];
+  } else if (type === 'general-wellbeing') {
+    title = 'Benessere Generale';
+    questions = [
+      { id: 'q1', text: 'Come valuti la tua qualità di vita generale?', type: 'range', min: 1, max: 10, label: '1=Molto bassa, 10=Ottima' },
+      { id: 'q2', text: 'Quanto sei soddisfatto delle tue relazioni sociali?', type: 'range', min: 1, max: 10, label: '1=Per niente, 10=Molto' },
+      { id: 'q3', text: 'Come valuti la tua capacità di svolgere le attività quotidiane?', type: 'range', min: 1, max: 10, label: '1=Molto compromessa, 10=Ottima' },
+      { id: 'q4', text: 'Quanto ti senti stressato?', type: 'range', min: 1, max: 10, label: '1=Per niente, 10=Molto' },
+      { id: 'q5', text: 'Quanto sei ottimista riguardo al futuro?', type: 'range', min: 1, max: 10, label: '1=Per niente, 10=Molto' }
+    ];
+  }
+%>
+
+<h2><%= title %></h2>
+
+<div class="card">
+  <p>Rispondi alle seguenti domande basandoti sulla tua esperienza degli ultimi 7 giorni.</p>
+  
+  <form method="POST" action="/user/questionnaires/<%= type %>">
+    <% questions.forEach((q, index) => { %>
+      <div class="form-group">
+        <label><strong>Domanda <%= index + 1 %>:</strong> <%= q.text %></label>
+        <input type="range" name="<%= q.id %>" min="<%= q.min %>" max="<%= q.max %>" value="<%= Math.floor((q.min + q.max) / 2) %>" 
+               oninput="document.getElementById('<%= q.id %>_value').textContent = this.value">
+        <div class="range-value">
+          <span id="<%= q.id %>_value"><%= Math.floor((q.min + q.max) / 2) %></span>
+          <div style="font-size: 0.9rem; color: #666;"><%= q.label %></div>
+        </div>
+      </div>
+    <% }); %>
+
+    <button type="submit" class="btn">Invia Questionario</button>
+    <a href="/user/questionnaires" class="btn btn-secondary" style="margin-left: 1rem;">Annulla</a>
+  </form>
+</div>
+
+<div class="card">
+  <h3>ℹ️ Informazioni</h3>
+  <p>
+    Le tue risposte verranno salvate e potrai visualizzarle nella pagina dei questionari. 
+    Questi dati possono aiutarti e il tuo terapeuta a monitorare i tuoi progressi nel tempo.
+  </p>
+</div>
+
+<%- include('../partials/footer') %>

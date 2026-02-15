@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<div class="hero">
+  <h2>Benvenuto su Eupolar</h2>
+  <p>Portale di psicoeducazione per il disturbo bipolare basato sul metodo di Colom e Vieta</p>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>📚 Informazioni sul Disturbo Bipolare</h3>
+    <p>Scopri caratteristiche, storia e consigli sul disturbo bipolare attraverso contenuti basati su evidenze scientifiche.</p>
+    <a href="/about" class="btn">Scopri di più</a>
+  </div>
+
+  <div class="card">
+    <h3>🎓 Psicoeducazione</h3>
+    <p>Materiali educativi per persone con diagnosi di disturbo bipolare per comprendere e gestire meglio la condizione.</p>
+    <a href="/psychoeducation" class="btn">Accedi</a>
+  </div>
+
+  <div class="card">
+    <h3>👨‍👩‍👧‍👦 Familiari e Amici</h3>
+    <p>Risorse per familiari e amici per supportare al meglio le persone care con disturbo bipolare.</p>
+    <a href="/family" class="btn">Scopri</a>
+  </div>
+
+  <div class="card">
+    <h3>⚕️ Operatori Sanitari</h3>
+    <p>Informazioni e strumenti per professionisti della salute mentale.</p>
+    <a href="/operators" class="btn">Esplora</a>
+  </div>
+</div>
+
+<% if (!user) { %>
+<div class="card">
+  <h3>🔐 Area Riservata agli Utenti Registrati</h3>
+  <p>Registrandoti avrai accesso a:</p>
+  <ul style="margin-left: 2rem; margin-top: 1rem;">
+    <li><strong>Lifechart:</strong> Strumento per tracciare l'andamento del tuo umore nel tempo</li>
+    <li><strong>Diario dell'Umore:</strong> Domande guidate per monitorare quotidianamente il tuo stato</li>
+    <li><strong>Questionari di Autoaiuto:</strong> Strumenti di valutazione e autovalutazione</li>
+  </ul>
+  <div style="margin-top: 1.5rem;">
+    <a href="/auth/register" class="btn btn-success">Registrati Ora</a>
+    <a href="/auth/login" class="btn btn-secondary" style="margin-left: 1rem;">Accedi</a>
+  </div>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>

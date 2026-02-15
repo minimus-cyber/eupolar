@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' - ' : '' %>Eupolar - Psicoeducazione Bipolare</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>🧠 Eupolar</h1>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">Info Disturbo Bipolare</a></li>
+          <li><a href="/psychoeducation">Psicoeducazione</a></li>
+          <li><a href="/family">Familiari e Amici</a></li>
+          <li><a href="/operators">Operatori</a></li>
+          <% if (user) { %>
+            <li><a href="/user/dashboard">Dashboard</a></li>
+            <li><a href="/auth/logout">Logout</a></li>
+          <% } else { %>
+            <li><a href="/auth/login">Accedi</a></li>
+            <li><a href="/auth/register">Registrati</a></li>
+          <% } %>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
