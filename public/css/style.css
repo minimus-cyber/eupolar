@@ -53,6 +53,7 @@ header h1 img {
   height: 40px;
   margin-right: 10px;
   flex-shrink: 0;
+  max-width: 40px;
 }
 
 nav ul {
@@ -263,6 +264,7 @@ footer {
   header h1 img {
     height: 32px;
     margin-right: 8px;
+    max-width: 32px;
   }
 
   nav ul {
