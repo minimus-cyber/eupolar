@@ -30,6 +30,24 @@
       <p>Una valutazione olistica del tuo benessere.</p>
       <a href="/user/questionnaires/general-wellbeing" class="btn btn-secondary">Compila</a>
     </div>
+
+    <div class="card" style="background-color: #f8f9fa;">
+      <h4>🏃 Attività Fisica</h4>
+      <p>Monitora il tuo livello di attività fisica e movimento.</p>
+      <a href="/user/questionnaires/physical-activity" class="btn btn-secondary">Compila</a>
+    </div>
+
+    <div class="card" style="background-color: #f8f9fa;">
+      <h4>🍎 Alimentazione</h4>
+      <p>Valuta le tue abitudini alimentari e nutrizionali.</p>
+      <a href="/user/questionnaires/nutrition" class="btn btn-secondary">Compila</a>
+    </div>
+
+    <div class="card" style="background-color: #f8f9fa;">
+      <h4>👥 Relazioni Sociali</h4>
+      <p>Valuta la qualità e frequenza delle tue interazioni sociali.</p>
+      <a href="/user/questionnaires/social-relationships" class="btn btn-secondary">Compila</a>
+    </div>
   </div>
 </div>
 
@@ -57,6 +75,9 @@
                   else if (typeName === 'medication-adherence') typeName = 'Aderenza alla Terapia';
                   else if (typeName === 'sleep-quality') typeName = 'Qualità del Sonno';
                   else if (typeName === 'general-wellbeing') typeName = 'Benessere Generale';
+                  else if (typeName === 'physical-activity') typeName = 'Attività Fisica';
+                  else if (typeName === 'nutrition') typeName = 'Alimentazione';
+                  else if (typeName === 'social-relationships') typeName = 'Relazioni Sociali';
                 %>
                 <%= typeName %>
               </td>

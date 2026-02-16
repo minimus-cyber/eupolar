@@ -124,11 +124,97 @@ router.post('/questionnaires/:type', (req, res) => {
   const userId = req.session.user.id;
   const responses = JSON.stringify(req.body);
   
-  // Simple scoring (can be enhanced based on questionnaire type)
+  // Calculate normalized score (0-100) based on questionnaire type
   let score = 0;
-  Object.values(req.body).forEach(val => {
-    if (!isNaN(val)) score += parseInt(val);
-  });
+  const answers = req.body;
+  
+  if (type === 'mood-assessment') {
+    // Q1: mood (1-10, higher is better for balance, 5 is ideal)
+    // Q2: sleep quality (1-10, higher is better)
+    // Q3: energy level (1-10, 5-6 is ideal)
+    // Q4: negative thoughts (1-10, lower is better) - REVERSE
+    // Q5: concentration (1-10, higher is better)
+    const q1Score = 10 - Math.abs(parseInt(answers.q1) - 5.5); // optimal around 5-6
+    const q2Score = parseInt(answers.q2);
+    const q3Score = 10 - Math.abs(parseInt(answers.q3) - 5.5); // optimal around 5-6
+    const q4Score = 11 - parseInt(answers.q4); // reverse scored
+    const q5Score = parseInt(answers.q5);
+    score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
+  } else if (type === 'medication-adherence') {
+    // Q1: frequency (1-10, higher is better)
+    // Q2: forgetting (1-10, higher is better - already states 10=never)
+    // Q3: satisfaction (1-10, higher is better)
+    // Q4: side effects (1-10, lower is better) - REVERSE
+    // Q5: ease of following (1-10, higher is better)
+    const q1Score = parseInt(answers.q1);
+    const q2Score = parseInt(answers.q2);
+    const q3Score = parseInt(answers.q3);
+    const q4Score = 11 - parseInt(answers.q4); // reverse scored
+    const q5Score = parseInt(answers.q5);
+    score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
+  } else if (type === 'sleep-quality') {
+    // Q1: hours (0-12, 7-8 is optimal)
+    // Q2: feeling rested (1-10, higher is better)
+    // Q3: time to fall asleep (1-10, lower is better) - REVERSE
+    // Q4: wake frequency (1-10, lower is better) - REVERSE
+    // Q5: overall quality (1-10, higher is better)
+    const hours = parseInt(answers.q1);
+    const q1Score = (10 - Math.abs(hours - 7.5)) * 1.25; // optimal 7-8 hours, scaled to 0-10
+    const q2Score = parseInt(answers.q2);
+    const q3Score = 11 - parseInt(answers.q3); // reverse scored
+    const q4Score = 11 - parseInt(answers.q4); // reverse scored
+    const q5Score = parseInt(answers.q5);
+    score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
+  } else if (type === 'general-wellbeing') {
+    // Q1: quality of life (1-10, higher is better)
+    // Q2: satisfaction with relationships (1-10, higher is better)
+    // Q3: daily activities (1-10, higher is better)
+    // Q4: stress (1-10, lower is better) - REVERSE
+    // Q5: optimism (1-10, higher is better)
+    const q1Score = parseInt(answers.q1);
+    const q2Score = parseInt(answers.q2);
+    const q3Score = parseInt(answers.q3);
+    const q4Score = 11 - parseInt(answers.q4); // reverse scored
+    const q5Score = parseInt(answers.q5);
+    score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
+  } else if (type === 'physical-activity') {
+    // Q1: days per week (0-7, normalized)
+    // Q2: minutes per day (0-120, normalized)
+    // Q3: intensity (1-10, higher is better)
+    // Q4: motivation (1-10, higher is better)
+    // Q5: feeling after (1-10, higher is better)
+    const q1Score = (parseInt(answers.q1) / 7) * 10; // normalize to 0-10
+    const q2Score = Math.min((parseInt(answers.q2) / 30) * 10, 10); // 30+ mins = full score
+    const q3Score = parseInt(answers.q3);
+    const q4Score = parseInt(answers.q4);
+    const q5Score = parseInt(answers.q5);
+    score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
+  } else if (type === 'nutrition') {
+    // Q1: regular meals (0-5, 3-4 is optimal)
+    // Q2: fruits/vegetables (1-10, higher is better)
+    // Q3: processed food (1-10, lower is better) - REVERSE
+    // Q4: water intake (0-10, 8+ glasses is optimal)
+    // Q5: overall quality (1-10, higher is better)
+    const meals = parseInt(answers.q1);
+    const q1Score = (10 - Math.abs(meals - 3.5)) * 2; // optimal 3-4 meals
+    const q2Score = parseInt(answers.q2);
+    const q3Score = 11 - parseInt(answers.q3); // reverse scored
+    const q4Score = Math.min((parseInt(answers.q4) / 8) * 10, 10); // 8+ glasses = full score
+    const q5Score = parseInt(answers.q5);
+    score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
+  } else if (type === 'social-relationships') {
+    // Q1: interaction frequency (1-10, higher is better)
+    // Q2: feeling supported (1-10, higher is better)
+    // Q3: feeling lonely (1-10, lower is better) - REVERSE
+    // Q4: relationship quality (1-10, higher is better)
+    // Q5: satisfaction (1-10, higher is better)
+    const q1Score = parseInt(answers.q1);
+    const q2Score = parseInt(answers.q2);
+    const q3Score = 11 - parseInt(answers.q3); // reverse scored
+    const q4Score = parseInt(answers.q4);
+    const q5Score = parseInt(answers.q5);
+    score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
+  }
 
   db.getDb().run(
     'INSERT INTO questionnaire_responses (user_id, questionnaire_type, responses, score) VALUES (?, ?, ?, ?)',
