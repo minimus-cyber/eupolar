@@ -196,7 +196,7 @@ router.post('/questionnaires/:type', (req, res) => {
     // Q4: water intake (0-10, 8+ glasses is optimal)
     // Q5: overall quality (1-10, higher is better)
     const meals = parseInt(answers.q1);
-    const q1Score = (10 - Math.abs(meals - 3.5)) * 2; // optimal 3-4 meals
+    const q1Score = Math.max(0, 10 - Math.abs(meals - 3.5) * 2); // optimal 3-4 meals
     const q2Score = parseInt(answers.q2);
     const q3Score = 11 - parseInt(answers.q3); // reverse scored
     const q4Score = Math.min((parseInt(answers.q4) / 8) * 10, 10); // 8+ glasses = full score
