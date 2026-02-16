@@ -130,17 +130,42 @@ router.post('/lifechart/submit', (req, res) => {
     label: 'Oggi'
   });
   
-  // Sort timeline by age
+  // Sort timeline by age and remove duplicates (keep the most significant event)
   timeline.sort((a, b) => a.age - b.age);
+  
+  // Remove duplicates, preferring labeled events or more extreme mood values
+  const uniqueTimeline = [];
+  const ageMap = new Map();
+  
+  timeline.forEach(point => {
+    if (!ageMap.has(point.age)) {
+      ageMap.set(point.age, point);
+    } else {
+      const existing = ageMap.get(point.age);
+      // Prefer labeled events or more extreme mood values
+      if (point.label || Math.abs(point.mood) > Math.abs(existing.mood)) {
+        ageMap.set(point.age, point);
+      }
+    }
+  });
+  
+  ageMap.forEach(point => uniqueTimeline.push(point));
+  uniqueTimeline.sort((a, b) => a.age - b.age);
   
   // Create data object
   const lifechartData = {
     ...formData,
-    timeline: timeline,
+    timeline: uniqueTimeline,
     generated_at: new Date().toISOString()
   };
   
-  const dataString = JSON.stringify(lifechartData);
+  let dataString;
+  try {
+    dataString = JSON.stringify(lifechartData);
+  } catch (err) {
+    console.error('Error serializing lifechart data:', err);
+    return res.status(500).send('Error saving lifechart data');
+  }
   
   // Insert or replace lifechart data
   db.getDb().run(

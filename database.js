@@ -76,18 +76,11 @@ const createTables = () => {
       });
 
       // Add new columns to existing mood_diary table if they don't exist
-      db.run(`ALTER TABLE mood_diary ADD COLUMN mood_level INTEGER`, (err) => {
-        // Ignore error if column already exists
-      });
-      db.run(`ALTER TABLE mood_diary ADD COLUMN sleep_hours REAL`, (err) => {
-        // Ignore error if column already exists
-      });
-      db.run(`ALTER TABLE mood_diary ADD COLUMN medications TEXT`, (err) => {
-        // Ignore error if column already exists
-      });
-      db.run(`ALTER TABLE mood_diary ADD COLUMN notes TEXT`, (err) => {
-        // Ignore error if column already exists
-      });
+      // SQLite doesn't support IF NOT EXISTS in ALTER TABLE, so we ignore errors
+      db.run(`ALTER TABLE mood_diary ADD COLUMN mood_level INTEGER`, () => {});
+      db.run(`ALTER TABLE mood_diary ADD COLUMN sleep_hours REAL`, () => {});
+      db.run(`ALTER TABLE mood_diary ADD COLUMN medications TEXT`, () => {});
+      db.run(`ALTER TABLE mood_diary ADD COLUMN notes TEXT`, () => {});
 
       // Questionnaire responses table
       db.run(`

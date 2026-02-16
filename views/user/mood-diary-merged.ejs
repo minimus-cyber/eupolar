@@ -167,7 +167,7 @@
 
     <script>
       // Simple chart visualization
-      const entries = <%- JSON.stringify(entries.slice().reverse()) %>;
+      const entries = JSON.parse('<%- JSON.stringify(JSON.stringify(entries.slice().reverse())) %>');
       const canvas = document.getElementById('moodChart');
       const ctx = canvas.getContext('2d');
       

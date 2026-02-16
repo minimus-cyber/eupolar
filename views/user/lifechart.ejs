@@ -35,12 +35,19 @@
     
     <div style="margin-top: 1.5rem;">
       <a href="/user/lifechart/edit" class="btn">Modifica Questionario</a>
-      <button onclick="if(confirm('Sei sicuro di voler rifare il questionario? I dati attuali verranno sovrascritti.')) window.location.href='/user/lifechart/new';" class="btn" style="background: #666;">Ricomincia da Capo</button>
+      <button id="restartBtn" class="btn" style="background: #666;">Ricomincia da Capo</button>
     </div>
 
     <script>
+      // Handle restart button
+      document.getElementById('restartBtn').addEventListener('click', function() {
+        if(confirm('Sei sicuro di voler rifare il questionario? I dati attuali verranno sovrascritti.')) {
+          window.location.href='/user/lifechart/new';
+        }
+      });
+      
       // Render lifechart from data
-      const lifechartData = <%- lifechart.data %>;
+      const lifechartData = JSON.parse('<%- JSON.stringify(JSON.stringify(lifechart.data)) %>');
       const canvas = document.getElementById('lifechartCanvas');
       const ctx = canvas.getContext('2d');
       
