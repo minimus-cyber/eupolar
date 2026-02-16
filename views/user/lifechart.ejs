@@ -40,7 +40,7 @@
 
     <script>
       // Render lifechart from data
-      const lifechartData = <%= lifechart.data %>;
+      const lifechartData = <%- lifechart.data %>;
       const canvas = document.getElementById('lifechartCanvas');
       const ctx = canvas.getContext('2d');
       
