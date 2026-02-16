@@ -23,26 +23,154 @@ router.get('/dashboard', (req, res) => {
 router.get('/lifechart', (req, res) => {
   const userId = req.session.user.id;
   
-  db.getDb().all(
-    'SELECT * FROM lifechart_entries WHERE user_id = ? ORDER BY date DESC LIMIT 30',
+  db.getDb().get(
+    'SELECT * FROM lifechart_data WHERE user_id = ?',
     [userId],
-    (err, entries) => {
+    (err, lifechart) => {
       if (err) {
         console.error(err);
-        entries = [];
+        lifechart = null;
       }
-      res.render('user/lifechart', { entries });
+      res.render('user/lifechart', { lifechart });
     }
   );
 });
 
-router.post('/lifechart', (req, res) => {
-  const { date, mood_level, sleep_hours, medications, notes } = req.body;
+router.get('/lifechart/new', (req, res) => {
+  // Delete existing lifechart to start fresh
   const userId = req.session.user.id;
-
   db.getDb().run(
-    'INSERT INTO lifechart_entries (user_id, date, mood_level, sleep_hours, medications, notes) VALUES (?, ?, ?, ?, ?, ?)',
-    [userId, date, mood_level, sleep_hours, medications, notes],
+    'DELETE FROM lifechart_data WHERE user_id = ?',
+    [userId],
+    (err) => {
+      if (err) console.error(err);
+      res.redirect('/user/lifechart');
+    }
+  );
+});
+
+router.get('/lifechart/edit', (req, res) => {
+  // For now, redirect to new - in future could pre-populate form
+  res.redirect('/user/lifechart/new');
+});
+
+router.post('/lifechart/submit', (req, res) => {
+  const userId = req.session.user.id;
+  const formData = req.body;
+  
+  // Generate timeline based on questionnaire responses
+  const timeline = [];
+  const currentAge = parseInt(formData.current_age) || 30;
+  
+  // Start with baseline euthymic state
+  timeline.push({ age: 0, mood: 0, type: 'euthymic' });
+  
+  // Add first episode if specified
+  if (formData.first_episode_age) {
+    const firstAge = parseInt(formData.first_episode_age);
+    const moodValue = formData.first_episode_type === 'manic' ? 3 : 
+                      formData.first_episode_type === 'hypomanic' ? 2 :
+                      formData.first_episode_type === 'depressive' ? -2 :
+                      formData.first_episode_type === 'mixed' ? 1 : 0;
+    timeline.push({ 
+      age: firstAge, 
+      mood: moodValue, 
+      type: formData.first_episode_type,
+      label: '1° episodio'
+    });
+  }
+  
+  // Add worst depression if specified
+  if (formData.worst_depression_age && formData.depressive_episodes > 0) {
+    const worstDepAge = parseInt(formData.worst_depression_age);
+    timeline.push({ 
+      age: worstDepAge, 
+      mood: -3, 
+      type: 'depressive',
+      label: 'Peggiore depressione'
+    });
+  }
+  
+  // Add worst mania if specified
+  if (formData.worst_mania_age && formData.manic_episodes > 0) {
+    const worstManiaAge = parseInt(formData.worst_mania_age);
+    timeline.push({ 
+      age: worstManiaAge, 
+      mood: 3, 
+      type: 'manic',
+      label: 'Peggiore mania'
+    });
+  }
+  
+  // Add treatment start as return to stability
+  if (formData.treatment_start_age) {
+    const treatmentAge = parseInt(formData.treatment_start_age);
+    timeline.push({ 
+      age: treatmentAge, 
+      mood: 0, 
+      type: 'euthymic',
+      label: 'Inizio trattamento'
+    });
+  }
+  
+  // Add current state
+  const currentMood = formData.current_state === 'euthymic' ? 0 :
+                      formData.current_state === 'mild-depression' ? -1 :
+                      formData.current_state === 'moderate-depression' ? -2 :
+                      formData.current_state === 'severe-depression' ? -3 :
+                      formData.current_state === 'mild-hypomania' ? 1 :
+                      formData.current_state === 'hypomania' ? 2 :
+                      formData.current_state === 'mania' ? 3 :
+                      formData.current_state === 'mixed' ? 1 : 0;
+  
+  timeline.push({ 
+    age: currentAge, 
+    mood: currentMood, 
+    type: formData.current_state || 'euthymic',
+    label: 'Oggi'
+  });
+  
+  // Sort timeline by age and remove duplicates (keep the most significant event)
+  timeline.sort((a, b) => a.age - b.age);
+  
+  // Remove duplicates, preferring labeled events or more extreme mood values
+  const uniqueTimeline = [];
+  const ageMap = new Map();
+  
+  timeline.forEach(point => {
+    if (!ageMap.has(point.age)) {
+      ageMap.set(point.age, point);
+    } else {
+      const existing = ageMap.get(point.age);
+      // Prefer labeled events or more extreme mood values
+      if (point.label || Math.abs(point.mood) > Math.abs(existing.mood)) {
+        ageMap.set(point.age, point);
+      }
+    }
+  });
+  
+  ageMap.forEach(point => uniqueTimeline.push(point));
+  uniqueTimeline.sort((a, b) => a.age - b.age);
+  
+  // Create data object
+  const lifechartData = {
+    ...formData,
+    timeline: uniqueTimeline,
+    generated_at: new Date().toISOString()
+  };
+  
+  let dataString;
+  try {
+    dataString = JSON.stringify(lifechartData);
+  } catch (err) {
+    console.error('Error serializing lifechart data:', err);
+    return res.status(500).send('Error saving lifechart data');
+  }
+  
+  // Insert or replace lifechart data
+  db.getDb().run(
+    'INSERT OR REPLACE INTO lifechart_data (user_id, data, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)',
+    [userId, dataString],
     (err) => {
       if (err) {
         console.error(err);
@@ -64,7 +192,7 @@ router.get('/mood-diary', (req, res) => {
         console.error(err);
         entries = [];
       }
-      res.render('user/mood-diary', { entries });
+      res.render('user/mood-diary-merged', { entries });
     }
   );
 });
@@ -75,19 +203,23 @@ router.post('/mood-diary', (req, res) => {
     mood_morning,
     mood_afternoon,
     mood_evening,
+    mood_level,
     energy_level,
     anxiety_level,
     irritability_level,
+    sleep_hours,
+    medications,
     activities,
-    thoughts
+    thoughts,
+    notes
   } = req.body;
   const userId = req.session.user.id;
 
   db.getDb().run(
     `INSERT INTO mood_diary 
-     (user_id, date, mood_morning, mood_afternoon, mood_evening, energy_level, anxiety_level, irritability_level, activities, thoughts) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [userId, date, mood_morning, mood_afternoon, mood_evening, energy_level, anxiety_level, irritability_level, activities, thoughts],
+     (user_id, date, mood_morning, mood_afternoon, mood_evening, mood_level, energy_level, anxiety_level, irritability_level, sleep_hours, medications, activities, thoughts, notes) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [userId, date, mood_morning, mood_afternoon, mood_evening, mood_level, energy_level, anxiety_level, irritability_level, sleep_hours, medications, activities, thoughts, notes],
     (err) => {
       if (err) {
         console.error(err);
