@@ -1,92 +1,47 @@
 <%- include('../partials/header') %>
 
-<h2>Lifechart - Grafico dell'Umore</h2>
+<h2>Lifechart - Questionario Diagnostico</h2>
 
 <div class="card">
-  <h3>Aggiungi Nuova Registrazione</h3>
-  <form method="POST" action="/user/lifechart">
-    <div class="grid">
-      <div class="form-group">
-        <label for="date">Data:</label>
-        <input type="date" id="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>">
-      </div>
-
-      <div class="form-group">
-        <label for="mood_level">Livello di Umore (-3 a +3):</label>
-        <input type="range" id="mood_level" name="mood_level" min="-3" max="3" value="0" oninput="document.getElementById('mood_value').textContent = this.value">
-        <div class="range-value">
-          <span id="mood_value">0</span>
-          <div style="font-size: 0.9rem; color: #666;">-3 = Molto depresso | 0 = Neutro | +3 = Molto euforico</div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="sleep_hours">Ore di Sonno:</label>
-        <input type="number" id="sleep_hours" name="sleep_hours" step="0.5" min="0" max="24">
-      </div>
-
-      <div class="form-group">
-        <label for="medications">Farmaci Assunti:</label>
-        <input type="text" id="medications" name="medications" placeholder="es. Litio 900mg, Quetiapina 200mg">
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="notes">Note:</label>
-      <textarea id="notes" name="notes" placeholder="Eventi significativi, sintomi, osservazioni..."></textarea>
-    </div>
-
-    <button type="submit" class="btn">Salva Registrazione</button>
-  </form>
+  <h3>Benvenuto al Questionario Lifechart</h3>
+  <p>Questo questionario ti aiuterà a creare una visualizzazione della tua storia di vita e dell'andamento dell'umore nel tempo. Le domande si adatteranno alla tua età e alle tue risposte.</p>
+  <p><strong>Tempo stimato:</strong> 10-15 minuti</p>
+  <p><strong>Privacy:</strong> Le tue risposte sono confidenziali e verranno utilizzate solo per generare il tuo lifechart personale.</p>
 </div>
 
-<div class="card">
-  <h3>Storico Registrazioni (Ultime 30)</h3>
-  
-  <% if (entries && entries.length > 0) { %>
-    <div style="overflow-x: auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Umore</th>
-            <th>Ore Sonno</th>
-            <th>Farmaci</th>
-            <th>Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% entries.forEach(entry => { %>
-            <tr>
-              <td><%= entry.date %></td>
-              <td>
-                <% 
-                  let moodText = '';
-                  if (entry.mood_level >= 2) moodText = '😄 +' + entry.mood_level;
-                  else if (entry.mood_level == 1) moodText = '🙂 +1';
-                  else if (entry.mood_level == 0) moodText = '😐 0';
-                  else if (entry.mood_level == -1) moodText = '😕 -1';
-                  else moodText = '😞 ' + entry.mood_level;
-                %>
-                <%= moodText %>
-              </td>
-              <td><%= entry.sleep_hours || '-' %></td>
-              <td><%= entry.medications || '-' %></td>
-              <td><%= entry.notes || '-' %></td>
-            </tr>
-          <% }); %>
-        </tbody>
-      </table>
+<% if (lifechart) { %>
+  <div class="card">
+    <h3>Il tuo Lifechart Generato</h3>
+    <p><strong>Data compilazione:</strong> <%= new Date(lifechart.created_at).toLocaleDateString('it-IT') %></p>
+    
+    <div style="margin-top: 2rem;">
+      <canvas id="lifechartCanvas" style="max-height: 400px;"></canvas>
     </div>
     
     <div style="margin-top: 2rem;">
-      <canvas id="moodChart" style="max-height: 400px;"></canvas>
+      <h4>Riepilogo della tua storia</h4>
+      <% if (lifechart.data) { %>
+        <% const data = JSON.parse(lifechart.data); %>
+        <ul style="margin-left: 2rem;">
+          <li><strong>Anno di nascita:</strong> <%= data.birth_year || 'Non specificato' %></li>
+          <li><strong>Età attuale:</strong> <%= data.current_age || 'Non specificata' %> anni</li>
+          <li><strong>Età primo episodio:</strong> <%= data.first_episode_age || 'Non specificata' %> anni</li>
+          <li><strong>Numero episodi depressivi:</strong> <%= data.depressive_episodes || '0' %></li>
+          <li><strong>Numero episodi maniacali/ipomaniacali:</strong> <%= data.manic_episodes || '0' %></li>
+          <li><strong>Ricoveri ospedalieri:</strong> <%= data.hospitalizations || '0' %></li>
+        </ul>
+      <% } %>
+    </div>
+    
+    <div style="margin-top: 1.5rem;">
+      <a href="/user/lifechart/edit" class="btn">Modifica Questionario</a>
+      <button onclick="if(confirm('Sei sicuro di voler rifare il questionario? I dati attuali verranno sovrascritti.')) window.location.href='/user/lifechart/new';" class="btn" style="background: #666;">Ricomincia da Capo</button>
     </div>
 
     <script>
-      // Simple chart visualization
-      const entries = <%- JSON.stringify(entries.slice().reverse()) %>;
-      const canvas = document.getElementById('moodChart');
+      // Render lifechart from data
+      const lifechartData = <%= lifechart.data %>;
+      const canvas = document.getElementById('lifechartCanvas');
       const ctx = canvas.getContext('2d');
       
       canvas.width = canvas.parentElement.offsetWidth;
@@ -108,38 +63,41 @@
       ctx.lineTo(canvas.width - padding, canvas.height - padding);
       ctx.stroke();
       
-      // Draw zero line
+      // Draw zero line (euthymic state)
       ctx.beginPath();
-      ctx.strokeStyle = '#ccc';
+      ctx.strokeStyle = '#4CAF50';
       ctx.lineWidth = 1;
       const zeroY = padding + height / 2;
       ctx.moveTo(padding, zeroY);
       ctx.lineTo(canvas.width - padding, zeroY);
       ctx.stroke();
       
-      // Draw grid lines and labels
+      // Labels
       ctx.font = '12px Arial';
       ctx.fillStyle = '#666';
-      for (let i = -3; i <= 3; i++) {
-        const y = zeroY - (i * height / 6);
-        ctx.fillText(i.toString(), padding - 25, y + 4);
-        
-        ctx.beginPath();
-        ctx.strokeStyle = '#eee';
-        ctx.moveTo(padding, y);
-        ctx.lineTo(canvas.width - padding, y);
-        ctx.stroke();
+      ctx.fillText('Mania/Ipomania', padding - 35, padding + 10);
+      ctx.fillText('Eutimia', padding - 35, zeroY);
+      ctx.fillText('Depressione', padding - 35, canvas.height - padding - 5);
+      
+      // Draw age labels on x-axis
+      const birthYear = lifechartData.birth_year || new Date().getFullYear() - (lifechartData.current_age || 30);
+      const currentAge = lifechartData.current_age || 30;
+      
+      for (let age = 0; age <= currentAge; age += 5) {
+        const x = padding + (age / currentAge) * width;
+        ctx.fillText(age.toString(), x - 5, canvas.height - padding + 20);
       }
       
-      if (entries.length > 0) {
-        // Draw mood line
+      // Draw lifecycle events
+      if (lifechartData.timeline && lifechartData.timeline.length > 0) {
         ctx.beginPath();
         ctx.strokeStyle = '#2c5aa0';
         ctx.lineWidth = 2;
         
-        entries.forEach((entry, index) => {
-          const x = padding + (index / Math.max(entries.length - 1, 1)) * width;
-          const y = zeroY - (entry.mood_level * height / 6);
+        lifechartData.timeline.forEach((point, index) => {
+          const x = padding + (point.age / currentAge) * width;
+          // Map mood from -3 to +3 to canvas y coordinate
+          const y = zeroY - (point.mood * height / 6);
           
           if (index === 0) {
             ctx.moveTo(x, y);
@@ -149,31 +107,211 @@
         });
         ctx.stroke();
         
-        // Draw points
-        entries.forEach((entry, index) => {
-          const x = padding + (index / Math.max(entries.length - 1, 1)) * width;
-          const y = zeroY - (entry.mood_level * height / 6);
+        // Draw points for episodes
+        lifechartData.timeline.forEach((point) => {
+          const x = padding + (point.age / currentAge) * width;
+          const y = zeroY - (point.mood * height / 6);
           
           ctx.beginPath();
-          ctx.fillStyle = entry.mood_level > 0 ? '#ff6b6b' : entry.mood_level < 0 ? '#6bb6ff' : '#666';
-          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          if (point.type === 'manic' || point.type === 'hypomanic') {
+            ctx.fillStyle = '#ff6b6b';
+          } else if (point.type === 'depressive') {
+            ctx.fillStyle = '#6bb6ff';
+          } else {
+            ctx.fillStyle = '#4CAF50';
+          }
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
           ctx.fill();
+          
+          // Add label for significant events
+          if (point.label) {
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.fillText(point.label, x - 15, y - 10);
+          }
         });
       }
     </script>
-  <% } else { %>
-    <p>Nessuna registrazione ancora. Inizia ad aggiungere i tuoi dati!</p>
-  <% } %>
-</div>
+  </div>
+<% } else { %>
+  <div class="card">
+    <h3>Inizia il Questionario</h3>
+    <form method="POST" action="/user/lifechart/submit">
+      
+      <h4 style="margin-top: 1.5rem;">Informazioni Generali</h4>
+      
+      <div class="form-group">
+        <label for="birth_year">Anno di nascita:</label>
+        <input type="number" id="birth_year" name="birth_year" required min="1900" max="<%= new Date().getFullYear() %>" placeholder="es. 1985">
+      </div>
+      
+      <div class="form-group">
+        <label for="current_age">Età attuale:</label>
+        <input type="number" id="current_age" name="current_age" required min="1" max="120" placeholder="es. 38">
+      </div>
+      
+      <h4 style="margin-top: 1.5rem;">Storia Clinica</h4>
+      
+      <div class="form-group">
+        <label for="diagnosis_age">A che età hai ricevuto la diagnosi di disturbo bipolare? (lascia vuoto se non ancora diagnosticato)</label>
+        <input type="number" id="diagnosis_age" name="diagnosis_age" min="0" max="120" placeholder="es. 28">
+      </div>
+      
+      <div class="form-group">
+        <label for="first_episode_age">A che età hai avuto il primo episodio significativo di alterazione dell'umore?</label>
+        <input type="number" id="first_episode_age" name="first_episode_age" min="0" max="120" placeholder="es. 23">
+      </div>
+      
+      <div class="form-group">
+        <label for="first_episode_type">Che tipo di episodio è stato?</label>
+        <select id="first_episode_type" name="first_episode_type">
+          <option value="">Seleziona...</option>
+          <option value="depressive">Episodio Depressivo</option>
+          <option value="manic">Episodio Maniacale</option>
+          <option value="hypomanic">Episodio Ipomaniacale</option>
+          <option value="mixed">Episodio Misto</option>
+          <option value="unknown">Non ricordo/Non so</option>
+        </select>
+      </div>
+      
+      <h4 style="margin-top: 1.5rem;">Episodi Depressivi</h4>
+      
+      <div class="form-group">
+        <label for="depressive_episodes">Quanti episodi depressivi significativi hai avuto nella tua vita?</label>
+        <input type="number" id="depressive_episodes" name="depressive_episodes" min="0" max="100" value="0">
+        <small style="color: #666;">Considera episodi che hanno durato almeno 2 settimane e hanno impattato significativamente la tua vita</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="worst_depression_age">A che età hai avuto l'episodio depressivo più grave?</label>
+        <input type="number" id="worst_depression_age" name="worst_depression_age" min="0" max="120" placeholder="es. 30">
+      </div>
+      
+      <div class="form-group">
+        <label for="depression_duration">Quanto sono durati in media i tuoi episodi depressivi?</label>
+        <select id="depression_duration" name="depression_duration">
+          <option value="">Seleziona...</option>
+          <option value="weeks">Alcune settimane</option>
+          <option value="months">Alcuni mesi (2-6)</option>
+          <option value="long">Molti mesi (6+)</option>
+          <option value="chronic">Più di un anno</option>
+        </select>
+      </div>
+      
+      <h4 style="margin-top: 1.5rem;">Episodi Maniacali/Ipomaniacali</h4>
+      
+      <div class="form-group">
+        <label for="manic_episodes">Quanti episodi maniacali o ipomaniacali hai avuto nella tua vita?</label>
+        <input type="number" id="manic_episodes" name="manic_episodes" min="0" max="100" value="0">
+        <small style="color: #666;">Include sia episodi maniacali completi che episodi ipomaniacali più lievi</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="worst_mania_age">A che età hai avuto l'episodio maniacale/ipomaniacale più grave?</label>
+        <input type="number" id="worst_mania_age" name="worst_mania_age" min="0" max="120" placeholder="es. 25">
+      </div>
+      
+      <div class="form-group">
+        <label for="mania_duration">Quanto sono durati in media i tuoi episodi maniacali/ipomaniacali?</label>
+        <select id="mania_duration" name="mania_duration">
+          <option value="">Seleziona...</option>
+          <option value="days">Alcuni giorni</option>
+          <option value="weeks">1-2 settimane</option>
+          <option value="longer">Più di 2 settimane</option>
+          <option value="months">Più di un mese</option>
+        </select>
+      </div>
+      
+      <h4 style="margin-top: 1.5rem;">Trattamenti e Ricoveri</h4>
+      
+      <div class="form-group">
+        <label for="treatment_start_age">A che età hai iniziato un trattamento farmacologico per il disturbo dell'umore?</label>
+        <input type="number" id="treatment_start_age" name="treatment_start_age" min="0" max="120" placeholder="es. 28">
+      </div>
+      
+      <div class="form-group">
+        <label for="hospitalizations">Quante volte sei stato ricoverato in ospedale per problemi legati all'umore?</label>
+        <input type="number" id="hospitalizations" name="hospitalizations" min="0" max="50" value="0">
+      </div>
+      
+      <div class="form-group">
+        <label for="psychotherapy">Hai fatto o stai facendo psicoterapia?</label>
+        <select id="psychotherapy" name="psychotherapy">
+          <option value="">Seleziona...</option>
+          <option value="no">No, mai</option>
+          <option value="past">Sì, in passato</option>
+          <option value="current">Sì, attualmente</option>
+          <option value="on-off">Sì, a periodi alterni</option>
+        </select>
+      </div>
+      
+      <h4 style="margin-top: 1.5rem;">Periodi di Stabilità</h4>
+      
+      <div class="form-group">
+        <label for="longest_stable_period">Qual è stato il periodo più lungo in cui ti sei sentito stabile (eutimico)?</label>
+        <select id="longest_stable_period" name="longest_stable_period">
+          <option value="">Seleziona...</option>
+          <option value="weeks">Alcune settimane</option>
+          <option value="months">Alcuni mesi (2-6)</option>
+          <option value="year">Circa un anno</option>
+          <option value="years">Più di un anno</option>
+          <option value="many-years">Diversi anni</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="current_state">Come descriveresti il tuo stato attuale?</label>
+        <select id="current_state" name="current_state">
+          <option value="">Seleziona...</option>
+          <option value="euthymic">Eutimico (stabile)</option>
+          <option value="mild-depression">Lievemente depresso</option>
+          <option value="moderate-depression">Moderatamente depresso</option>
+          <option value="severe-depression">Gravemente depresso</option>
+          <option value="mild-hypomania">Lievemente ipomaniacale</option>
+          <option value="hypomania">Ipomaniacale</option>
+          <option value="mania">Maniacale</option>
+          <option value="mixed">Sintomi misti</option>
+        </select>
+      </div>
+      
+      <h4 style="margin-top: 1.5rem;">Fattori di Vita</h4>
+      
+      <div class="form-group">
+        <label for="life_events">Ci sono stati eventi di vita significativi che hanno influenzato il decorso del disturbo?</label>
+        <textarea id="life_events" name="life_events" placeholder="es. Perdita di una persona cara, cambio di lavoro, nascita di un figlio, divorzio, trasloco importante..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="seasonal_pattern">Hai notato un pattern stagionale nei tuoi episodi?</label>
+        <select id="seasonal_pattern" name="seasonal_pattern">
+          <option value="">Seleziona...</option>
+          <option value="no">No, nessun pattern particolare</option>
+          <option value="winter-depression">Depressione in inverno</option>
+          <option value="spring-mania">Mania/ipomania in primavera</option>
+          <option value="summer-mania">Mania/ipomania in estate</option>
+          <option value="fall-depression">Depressione in autunno</option>
+          <option value="other">Altro pattern</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="additional_notes">Note aggiuntive o informazioni che ritieni importanti:</label>
+        <textarea id="additional_notes" name="additional_notes" placeholder="Qualsiasi altra informazione che vuoi aggiungere al tuo lifechart..."></textarea>
+      </div>
+      
+      <button type="submit" class="btn">Genera Lifechart</button>
+    </form>
+  </div>
+<% } %>
 
 <div class="card">
-  <h3>💡 Suggerimenti per l'uso del Lifechart</h3>
+  <h3>💡 Informazioni sul Lifechart</h3>
   <ul style="margin-left: 2rem;">
-    <li>Registra i dati ogni giorno alla stessa ora per maggiore consistenza</li>
-    <li>Sii onesto nelle valutazioni - i dati sono solo per te e il tuo medico</li>
-    <li>Annota eventi significativi che potrebbero influenzare l'umore</li>
-    <li>Porta il grafico alle visite mediche per discutere i pattern</li>
-    <li>Cerca di identificare fattori scatenanti o protettivi</li>
+    <li>Il lifechart è uno strumento diagnostico che aiuta a visualizzare il decorso del disturbo bipolare nel tempo</li>
+    <li>È utile per identificare pattern, fattori scatenanti e periodi di stabilità</li>
+    <li>Porta il tuo lifechart generato alle visite mediche per discutere la tua storia clinica</li>
+    <li>Puoi aggiornare il lifechart in qualsiasi momento se ricordi nuovi dettagli</li>
+    <li>I dati sono privati e vengono utilizzati solo per generare la tua visualizzazione personale</li>
   </ul>
 </div>
 

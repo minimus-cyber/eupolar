@@ -1,0 +1,269 @@
+<%- include('../partials/header') %>
+
+<h2>Diario dell'Umore</h2>
+
+<div class="card">
+  <h3>Nuova Registrazione Completa</h3>
+  <form method="POST" action="/user/mood-diary">
+    <div class="form-group">
+      <label for="date">Data:</label>
+      <input type="date" id="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>">
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Umore della Giornata</h4>
+    
+    <div class="form-group">
+      <label for="mood_morning">Umore al Mattino (1-10):</label>
+      <input type="range" id="mood_morning" name="mood_morning" min="1" max="10" value="5" oninput="document.getElementById('morning_value').textContent = this.value">
+      <div class="range-value">
+        <span id="morning_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto basso | 10 = Molto alto</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mood_afternoon">Umore al Pomeriggio (1-10):</label>
+      <input type="range" id="mood_afternoon" name="mood_afternoon" min="1" max="10" value="5" oninput="document.getElementById('afternoon_value').textContent = this.value">
+      <div class="range-value">
+        <span id="afternoon_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto basso | 10 = Molto alto</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mood_evening">Umore alla Sera (1-10):</label>
+      <input type="range" id="mood_evening" name="mood_evening" min="1" max="10" value="5" oninput="document.getElementById('evening_value').textContent = this.value">
+      <div class="range-value">
+        <span id="evening_value">5</span>
+        <div style="font-size: 0.9rem; color: #666;">1 = Molto basso | 10 = Molto alto</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mood_level">Livello Complessivo di Umore (-3 a +3):</label>
+      <input type="range" id="mood_level" name="mood_level" min="-3" max="3" value="0" oninput="document.getElementById('mood_value').textContent = this.value">
+      <div class="range-value">
+        <span id="mood_value">0</span>
+        <div style="font-size: 0.9rem; color: #666;">-3 = Molto depresso | 0 = Neutro | +3 = Molto euforico</div>
+      </div>
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Altri Parametri</h4>
+
+    <div class="grid">
+      <div class="form-group">
+        <label for="energy_level">Livello di Energia (1-10):</label>
+        <input type="range" id="energy_level" name="energy_level" min="1" max="10" value="5" oninput="document.getElementById('energy_value').textContent = this.value">
+        <div class="range-value">
+          <span id="energy_value">5</span>
+          <div style="font-size: 0.9rem; color: #666;">1 = Esausto | 10 = Pieno di energia</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="anxiety_level">Livello di Ansia (1-10):</label>
+        <input type="range" id="anxiety_level" name="anxiety_level" min="1" max="10" value="5" oninput="document.getElementById('anxiety_value').textContent = this.value">
+        <div class="range-value">
+          <span id="anxiety_value">5</span>
+          <div style="font-size: 0.9rem; color: #666;">1 = Molto calmo | 10 = Molto ansioso</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="irritability_level">Livello di Irritabilità (1-10):</label>
+        <input type="range" id="irritability_level" name="irritability_level" min="1" max="10" value="5" oninput="document.getElementById('irritability_value').textContent = this.value">
+        <div class="range-value">
+          <span id="irritability_value">5</span>
+          <div style="font-size: 0.9rem; color: #666;">1 = Molto calmo | 10 = Molto irritabile</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="sleep_hours">Ore di Sonno:</label>
+        <input type="number" id="sleep_hours" name="sleep_hours" step="0.5" min="0" max="24" placeholder="es. 7.5">
+      </div>
+    </div>
+
+    <h4 style="margin-top: 1.5rem;">Informazioni Aggiuntive</h4>
+
+    <div class="form-group">
+      <label for="medications">Farmaci Assunti:</label>
+      <input type="text" id="medications" name="medications" placeholder="es. Litio 900mg, Quetiapina 200mg">
+    </div>
+
+    <div class="form-group">
+      <label for="activities">Attività della Giornata:</label>
+      <textarea id="activities" name="activities" placeholder="Cosa hai fatto oggi? (lavoro, hobby, esercizio, socializzazione...)"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="thoughts">Pensieri Predominanti:</label>
+      <textarea id="thoughts" name="thoughts" placeholder="Quali pensieri hanno caratterizzato la tua giornata?"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="notes">Note ed Eventi Significativi:</label>
+      <textarea id="notes" name="notes" placeholder="Eventi significativi, sintomi, osservazioni..."></textarea>
+    </div>
+
+    <button type="submit" class="btn">Salva nel Diario</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Storico Registrazioni (Ultime 30)</h3>
+  
+  <% if (entries && entries.length > 0) { %>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Umore Complessivo</th>
+            <th>Mattino</th>
+            <th>Pomeriggio</th>
+            <th>Sera</th>
+            <th>Energia</th>
+            <th>Ansia</th>
+            <th>Irritabilità</th>
+            <th>Ore Sonno</th>
+            <th>Farmaci</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% entries.forEach(entry => { %>
+            <tr>
+              <td><%= entry.date %></td>
+              <td>
+                <% 
+                  let moodText = '';
+                  if (entry.mood_level >= 2) moodText = '😄 +' + entry.mood_level;
+                  else if (entry.mood_level == 1) moodText = '🙂 +1';
+                  else if (entry.mood_level == 0) moodText = '😐 0';
+                  else if (entry.mood_level == -1) moodText = '😕 -1';
+                  else if (entry.mood_level <= -2) moodText = '😞 ' + entry.mood_level;
+                  else moodText = entry.mood_level !== null ? entry.mood_level : '-';
+                %>
+                <%= moodText %>
+              </td>
+              <td><%= entry.mood_morning || '-' %>/10</td>
+              <td><%= entry.mood_afternoon || '-' %>/10</td>
+              <td><%= entry.mood_evening || '-' %>/10</td>
+              <td><%= entry.energy_level || '-' %>/10</td>
+              <td><%= entry.anxiety_level || '-' %>/10</td>
+              <td><%= entry.irritability_level || '-' %>/10</td>
+              <td><%= entry.sleep_hours || '-' %></td>
+              <td><%= entry.medications || '-' %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    
+    <div style="margin-top: 2rem;">
+      <h4>Grafico dell'Umore Complessivo</h4>
+      <canvas id="moodChart" style="max-height: 400px;"></canvas>
+    </div>
+
+    <script>
+      // Simple chart visualization
+      const entries = <%- JSON.stringify(entries.slice().reverse()) %>;
+      const canvas = document.getElementById('moodChart');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = 300;
+      
+      const padding = 40;
+      const width = canvas.width - 2 * padding;
+      const height = canvas.height - 2 * padding;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw axes
+      ctx.beginPath();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, canvas.height - padding);
+      ctx.lineTo(canvas.width - padding, canvas.height - padding);
+      ctx.stroke();
+      
+      // Draw zero line
+      ctx.beginPath();
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 1;
+      const zeroY = padding + height / 2;
+      ctx.moveTo(padding, zeroY);
+      ctx.lineTo(canvas.width - padding, zeroY);
+      ctx.stroke();
+      
+      // Draw grid lines and labels
+      ctx.font = '12px Arial';
+      ctx.fillStyle = '#666';
+      for (let i = -3; i <= 3; i++) {
+        const y = zeroY - (i * height / 6);
+        ctx.fillText(i.toString(), padding - 25, y + 4);
+        
+        ctx.beginPath();
+        ctx.strokeStyle = '#eee';
+        ctx.moveTo(padding, y);
+        ctx.lineTo(canvas.width - padding, y);
+        ctx.stroke();
+      }
+      
+      // Filter entries that have mood_level data
+      const moodEntries = entries.filter(e => e.mood_level !== null && e.mood_level !== undefined);
+      
+      if (moodEntries.length > 0) {
+        // Draw mood line
+        ctx.beginPath();
+        ctx.strokeStyle = '#2c5aa0';
+        ctx.lineWidth = 2;
+        
+        moodEntries.forEach((entry, index) => {
+          const x = padding + (index / Math.max(moodEntries.length - 1, 1)) * width;
+          const y = zeroY - (entry.mood_level * height / 6);
+          
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.stroke();
+        
+        // Draw points
+        moodEntries.forEach((entry, index) => {
+          const x = padding + (index / Math.max(moodEntries.length - 1, 1)) * width;
+          const y = zeroY - (entry.mood_level * height / 6);
+          
+          ctx.beginPath();
+          ctx.fillStyle = entry.mood_level > 0 ? '#ff6b6b' : entry.mood_level < 0 ? '#6bb6ff' : '#666';
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+    </script>
+  <% } else { %>
+    <p>Nessuna registrazione ancora. Inizia a tenere il tuo diario!</p>
+  <% } %>
+</div>
+
+<div class="card">
+  <h3>💡 Suggerimenti per l'uso del Diario dell'Umore</h3>
+  <ul style="margin-left: 2rem;">
+    <li>Registra i dati ogni giorno alla stessa ora per maggiore consistenza</li>
+    <li>Compila il diario ogni sera prima di andare a letto</li>
+    <li>Sii onesto e specifico nelle valutazioni - i dati sono solo per te e il tuo medico</li>
+    <li>Non giudicarti - registra semplicemente come ti senti</li>
+    <li>Annota eventi significativi che potrebbero influenzare l'umore</li>
+    <li>Cerca pattern che si ripetono nel tempo</li>
+    <li>Nota come diversi fattori (sonno, attività, eventi, farmaci) influenzano il tuo umore</li>
+    <li>Cerca di identificare fattori scatenanti o protettivi</li>
+    <li>Porta i dati alle visite mediche per discutere i pattern con il tuo medico o terapeuta</li>
+  </ul>
+</div>
+
+<%- include('../partials/footer') %>
