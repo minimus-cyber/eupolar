@@ -1,7 +1,7 @@
 {
   "name": "eupolar",
   "version": "1.0.0",
-  "description": "portale di psicoeducazione basato sul metodo di Colom e Vieta",
+  "description": "portale di psicoeducazione basato sul modello di Colom e Vieta",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",

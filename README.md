@@ -1,10 +1,10 @@
 # Eupolar 🧠
 
-Portale di psicoeducazione per il disturbo bipolare basato sul metodo di Colom e Vieta.
+Portale di psicoeducazione per il disturbo bipolare basato sul modello di Colom e Vieta.
 
 ## Descrizione
 
-Eupolar è un portale web completo dedicato alla psicoeducazione sul disturbo bipolare, sviluppato seguendo le linee guida del metodo scientifico di Colom e Vieta dell'Università di Barcellona.
+Eupolar è un portale web completo dedicato alla psicoeducazione sul disturbo bipolare, sviluppato seguendo le linee guida del modello scientifico di Colom e Vieta dell'Università di Barcellona.
 
 ### Funzionalità per Utenti Non Registrati
 
