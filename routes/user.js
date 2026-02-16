@@ -134,9 +134,9 @@ router.post('/questionnaires/:type', (req, res) => {
     // Q3: energy level (1-10, 5-6 is ideal)
     // Q4: negative thoughts (1-10, lower is better) - REVERSE
     // Q5: concentration (1-10, higher is better)
-    const q1Score = 10 - Math.abs(parseInt(answers.q1) - 5.5); // optimal around 5-6
+    const q1Score = Math.max(0, 10 - Math.abs(parseInt(answers.q1) - 5.5)); // optimal around 5-6
     const q2Score = parseInt(answers.q2);
-    const q3Score = 10 - Math.abs(parseInt(answers.q3) - 5.5); // optimal around 5-6
+    const q3Score = Math.max(0, 10 - Math.abs(parseInt(answers.q3) - 5.5)); // optimal around 5-6
     const q4Score = 11 - parseInt(answers.q4); // reverse scored
     const q5Score = parseInt(answers.q5);
     score = Math.round(((q1Score + q2Score + q3Score + q4Score + q5Score) / 50) * 100);
@@ -159,7 +159,7 @@ router.post('/questionnaires/:type', (req, res) => {
     // Q4: wake frequency (1-10, lower is better) - REVERSE
     // Q5: overall quality (1-10, higher is better)
     const hours = parseInt(answers.q1);
-    const q1Score = (10 - Math.abs(hours - 7.5)) * 1.25; // optimal 7-8 hours, scaled to 0-10
+    const q1Score = Math.max(0, (10 - Math.abs(hours - 7.5)) * 1.25); // optimal 7-8 hours, scaled to 0-10
     const q2Score = parseInt(answers.q2);
     const q3Score = 11 - parseInt(answers.q3); // reverse scored
     const q4Score = 11 - parseInt(answers.q4); // reverse scored
@@ -196,6 +196,7 @@ router.post('/questionnaires/:type', (req, res) => {
     // Q4: water intake (0-10, 8+ glasses is optimal)
     // Q5: overall quality (1-10, higher is better)
     const meals = parseInt(answers.q1);
+    // Multiply by 2 to scale deviation to 0-10 range (max deviation of 5 meals * 2 = 10 points penalty)
     const q1Score = Math.max(0, 10 - Math.abs(meals - 3.5) * 2); // optimal 3-4 meals
     const q2Score = parseInt(answers.q2);
     const q3Score = 11 - parseInt(answers.q3); // reverse scored
